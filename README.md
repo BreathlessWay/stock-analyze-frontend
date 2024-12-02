@@ -159,10 +159,3 @@ pnpm build
 
 QQ1群：328347666 （已满）
 QQ2群：741353560
-
-## 💖 赞助
-#### 如果您觉得这个项目对您有帮助，可以通过下面的链接为作者买一杯果汁，表示感谢！。
-
-![donate](https://assets.naiveadmin.com/images/sponsor.png)
-
-[Paypal Me](https://www.paypal.com/paypalme/majunping)
