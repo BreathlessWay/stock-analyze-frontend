@@ -5,5 +5,5 @@ export const websiteConfig = Object.freeze({
   title: '股票收益分析',
   logo: logoImage,
   loginImage: loginImage,
-  loginDesc: 'Naive Ui Admin中后台前端/设计解决方案',
+  loginDesc: '股票收益分析',
 });

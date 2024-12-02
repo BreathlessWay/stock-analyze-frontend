@@ -45,8 +45,6 @@ export const constantRouter: RouteRecordRaw[] = [LoginRoute, RootRoute];
 const router = createRouter({
   history: createWebHashHistory(),
   routes: constantRouter,
-  strict: true,
-  scrollBehavior: () => ({ left: 0, top: 0 }),
 });
 
 export function setupRouter(app: App) {
