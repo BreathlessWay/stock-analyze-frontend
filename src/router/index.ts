@@ -36,11 +36,20 @@ export const LoginRoute: RouteRecordRaw = {
   },
 };
 
+export const RegisterRoute: RouteRecordRaw = {
+  path: '/register',
+  name: 'Register',
+  component: () => import('@/views/register/index.vue'),
+  meta: {
+    title: '注册',
+  },
+};
+
 //需要验证权限
 export const asyncRoutes = [...routeModuleList];
 
 //普通路由 无需验证权限
-export const constantRouter: RouteRecordRaw[] = [LoginRoute, RootRoute];
+export const constantRouter: RouteRecordRaw[] = [LoginRoute, RootRoute, RegisterRoute];
 
 const router = createRouter({
   history: createWebHashHistory(),
