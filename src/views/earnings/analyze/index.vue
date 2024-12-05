@@ -18,14 +18,18 @@
         />
       </n-form-item>
       <n-form-item label="日期" path="datetimeValue">
-        <n-date-picker v-model:value="model.datetimeValue" type="daterange" />
+        <n-date-picker
+          v-model:value="model.datetimeValue"
+          type="daterange"
+          :is-date-disabled="disablePreviousDate"
+        />
       </n-form-item>
       <n-space>
         <n-button type="primary" @click="handleValidateButtonClick">查询</n-button>
         <n-button @click="reset">重置</n-button>
       </n-space>
     </n-form>
-    <FileComponent v-model:stocks="stocks" />
+    <FileComponent />
     <Charts :loading="loading" :x="searchResult.x" :y="searchResult.y" />
   </article>
 </template>
@@ -37,6 +41,7 @@
   import Charts from './components/Charts.vue';
 
   import type { FormInst, FormItemRule } from 'naive-ui';
+  import { analyzeStockService } from '@/api/earnings/analyze';
 
   const formRef = ref<FormInst | null>(null);
   const loading = ref(false);
@@ -44,7 +49,6 @@
     inputValue: null,
     datetimeValue: null,
   });
-  const stocks = ref<string[]>([]);
   const rules = {
     inputValue: {
       validator(_: FormItemRule, value: string) {
@@ -78,6 +82,10 @@
     y: [] as number[],
   });
 
+  const disablePreviousDate = (ts: number) => {
+    return ts > Date.now();
+  };
+
   const reset = () => {
     model.value = {
       inputValue: null,
@@ -88,15 +96,18 @@
 
   const handleValidateButtonClick = (e: MouseEvent) => {
     e.preventDefault();
-    formRef.value?.validate((errors) => {
+    formRef.value?.validate(async (errors) => {
       if (!errors) {
         loading.value = true;
-        console.log(model.value, stocks.value);
-        setTimeout(() => {
-          loading.value = false;
-          searchResult.x = [111];
-          searchResult.y = [1111];
-        }, 1000);
+        const res = await analyzeStockService({
+          stock_code: model.value.inputValue,
+          start_date: model.value?.datetimeValue?.[0],
+          end_date: model.value?.datetimeValue?.[1],
+        });
+        console.log(res);
+        loading.value = false;
+        searchResult.x = [111];
+        searchResult.y = [1111];
       } else {
         console.log(errors);
       }
