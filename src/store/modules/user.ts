@@ -10,6 +10,7 @@ export type UserInfoType = {
   // TODO: add your own data
   operName: string;
   email: string;
+  uploadFilePath: string;
 };
 
 export interface IUserState {
@@ -59,7 +60,9 @@ export const useUserStore = defineStore({
       this.permissions = permissions;
     },
     setUserInfo(info: UserInfoType) {
+      const ex = 7 * 24 * 60 * 60;
       this.info = info;
+      storage.set(CURRENT_USER, info, ex);
     },
     // 登录
     async login(params: any) {
@@ -103,7 +106,7 @@ export const useUserStore = defineStore({
     // 登出
     async logout() {
       this.setPermissions([]);
-      this.setUserInfo({ operName: '', email: '' });
+      this.setUserInfo({ operName: '', email: '', uploadFilePath: '' });
       storage.remove(ACCESS_TOKEN);
       storage.remove(CURRENT_USER);
     },

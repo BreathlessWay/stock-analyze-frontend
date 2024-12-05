@@ -13,6 +13,7 @@ export const Alova = createAlova({
   baseURL: apiUrl,
   statesHook: VueHook,
   // cacheLogger: process.env.NODE_ENV === 'development',
+  cacheFor: 0 as any,
   requestAdapter: adapterFetch(),
   beforeRequest(method) {
     const userStore = useUser();

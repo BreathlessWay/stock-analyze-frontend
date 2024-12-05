@@ -1,12 +1,10 @@
 <template>
   <n-space align="center">
-    <n-button text tag="a" href="https://anyway.fm/news.php" target="_blank" download="模板">
-      下载模板
-    </n-button>
+    <n-button text @click="handleDownloadTemplate"> 下载模板 </n-button>
     <n-upload
       class="earnings-analyze_upload"
       v-model:file-list="uploadFile"
-      action="https://naive-upload.free.beeceptor.com/"
+      action="/earnings/analyze_file"
       accept=".xls,.xlsx"
       show-download-button
       @before-upload="beforeUpload"
@@ -19,11 +17,17 @@
   </n-space>
 </template>
 <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, watch } from 'vue';
 
   import { useMessage } from 'naive-ui';
 
+  import { useDownload } from '@/hooks/useDownload';
+
+  import { useUserStore } from '@/store/modules/user';
+
   import { Alova } from '@/utils/http/alova';
+
+  import { deleteFileService, getTemplateFilePathService } from '@/api/earnings/analyze';
 
   import type { UploadFileInfo, UploadCustomRequestOptions } from 'naive-ui';
 
@@ -39,16 +43,61 @@
         status: string;
       }[];
 
-  const modalValue = defineModel<string[]>('stocks', {
-    required: true,
-  });
+  const userStore = useUserStore();
 
   const loading = ref(false);
   const uploadFile = ref<UploadFileType>([]);
 
-  const handleRemove = (data: { file: UploadFileInfo; fileList: UploadFileInfo[] }) => {
-    console.log(data, uploadFile.value);
-    uploadFile.value = [];
+  watch(
+    () => userStore.info,
+    () => {
+      if (userStore.token && userStore.info.uploadFilePath) {
+        const [, , name] = userStore.info.uploadFilePath.split('/');
+        uploadFile.value = [
+          {
+            id: Date.now().toString(),
+            name,
+            url: `${import.meta.env.VITE_GLOB_API_URL}/${userStore.info.uploadFilePath}`,
+            status: 'finished',
+          },
+        ];
+      }
+    },
+    {
+      immediate: true,
+    }
+  );
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const res = await getTemplateFilePathService();
+      if (res) {
+        const fileHref = `${import.meta.env.VITE_GLOB_API_URL}/${res.template_file}`;
+        useDownload(fileHref, '');
+        return;
+      }
+      throw '';
+    } catch (e) {
+      message.error('获取模板文件失败');
+    }
+  };
+
+  const handleRemove = async () => {
+    try {
+      const res = await deleteFileService();
+      if (res) {
+        uploadFile.value = [];
+        const { uploadFilePath, ...rest } = userStore.info;
+        userStore.setUserInfo({
+          ...rest,
+          uploadFilePath: '',
+        });
+        return '';
+      }
+      throw '';
+    } catch (e) {
+      message.error('删除文件失败');
+    }
   };
 
   const handleDownload = (file: UploadFileInfo) => {
@@ -72,14 +121,10 @@
   const customRequest = async ({
     file,
     data,
-    headers,
-    withCredentials,
     action,
     onFinish,
     onError,
-    onProgress,
   }: UploadCustomRequestOptions) => {
-    console.log(file);
     try {
       loading.value = true;
       const formData = new FormData();
@@ -88,21 +133,19 @@
           formData.append(key, data[key as keyof UploadCustomRequestOptions['data']]);
         });
       }
-      formData.append(file.name, file.file as File);
-      const res = await Alova.Post(action as string, {
-        withCredentials,
-        headers: headers as Record<string, string>,
-        body: formData,
-        onUploadProgress: ({ percent }) => {
-          onProgress({ percent: Math.ceil(percent) });
-        },
-      });
-      console.log(res);
-      modalValue.value = ['1111111'];
-      message.success('解析成功');
+      formData.append('file', file.file as File);
+      const res = (await Alova.Post(action as string, formData)) as { uploadFilePath: string };
+      if (res) {
+        const { uploadFilePath, ...rest } = userStore.info;
+        userStore.setUserInfo({
+          ...rest,
+          uploadFilePath: res.uploadFilePath,
+        });
+        message.success('文件上传成功');
+      }
       onFinish();
     } catch (e: any) {
-      message.error(e.message || '文件上传解析失败');
+      message.error(e.message || '文件上传失败');
       onError();
     } finally {
       loading.value = false;
