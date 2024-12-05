@@ -82,10 +82,6 @@
   import { type FormItemRule, useMessage } from 'naive-ui';
   import { ResultEnum } from '@/enums/httpEnum';
   import { PersonOutline, LockClosedOutline } from '@vicons/ionicons5';
-  interface FormState {
-    username: string;
-    password: string;
-  }
 
   const formRef = ref();
   const message = useMessage();
@@ -150,28 +146,31 @@
     formRef.value.validate(async (errors) => {
       if (!errors) {
         const { username, password1 } = formInline;
-        message.loading('登录中...');
+        message.loading('注册中...');
         loading.value = true;
 
-        const params: FormState = {
-          username,
-          password: password1,
+        const params = {
+          operName: username.toString(),
+          passwd: password1.toString(),
         };
 
         try {
-          const { code, message: msg } = await userStore.login(params);
+          const { statusCode, message: msg } = await userStore.register(params);
           message.destroyAll();
-          if (code == ResultEnum.SUCCESS) {
-            message.success('注册成功');
-            await router.replace('/login');
+          if (statusCode == ResultEnum.SUCCESS) {
+            message.success('注册成功，即将进入系统');
+            await router.replace('/');
           } else {
-            message.info(msg || '注册失败');
+            if (msg === 'SequelizeUniqueConstraintError') {
+              return message.error('用户已存在');
+            }
+            message.error(msg || '注册失败');
           }
         } finally {
           loading.value = false;
         }
       } else {
-        message.error('请填写完整信息，并且进行验证码校验');
+        message.error('请填写完整信息，并且进行校验');
       }
     });
   };

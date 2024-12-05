@@ -4,7 +4,7 @@ import { Alova } from '@/utils/http/alova/index';
  * @description: 获取用户信息
  */
 export function getUserInfo() {
-  return Alova.Get<InResult>('/admin_info', {
+  return Alova.Get<InResult>('/user/info', {
     meta: {
       isReturnNativeResponse: true,
     },
@@ -16,9 +16,26 @@ export function getUserInfo() {
  */
 export function login(params) {
   return Alova.Post<InResult>(
-    '/login',
+    '/user/login',
     {
-      params,
+      ...params,
+    },
+    {
+      meta: {
+        isReturnNativeResponse: true,
+      },
+    }
+  );
+}
+
+/**
+ * @description: 用户注册
+ */
+export function register(params) {
+  return Alova.Post<InResult>(
+    '/user/register',
+    {
+      ...params,
     },
     {
       meta: {

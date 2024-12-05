@@ -62,15 +62,11 @@
   import { reactive, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useUserStore } from '@/store/modules/user';
-  import { useMessage } from 'naive-ui';
+  import { type FormItemRule, useMessage } from 'naive-ui';
   import { ResultEnum } from '@/enums/httpEnum';
   import { PersonOutline, LockClosedOutline } from '@vicons/ionicons5';
   import { PageEnum } from '@/enums/pageEnum';
   import { websiteConfig } from '@/config/website.config';
-  interface FormState {
-    username: string;
-    password: string;
-  }
 
   const formRef = ref();
   const message = useMessage();
@@ -79,14 +75,30 @@
   const LOGIN_NAME = PageEnum.BASE_LOGIN_NAME;
 
   const formInline = reactive({
-    username: 'admin',
-    password: '123456',
+    username: '',
+    password: '',
     isCaptcha: true,
   });
 
   const rules = {
-    username: { required: true, message: '请输入用户名', trigger: 'blur' },
-    password: { required: true, message: '请输入密码', trigger: 'blur' },
+    username: {
+      validator(_: FormItemRule, value: string) {
+        if (!/^[a-zA-Z0-9_]{5,10}$/.test(value)) {
+          return new Error('用户名需要5-10位数字字母_');
+        }
+        return true;
+      },
+      trigger: 'blur',
+    },
+    password: {
+      validator(_: FormItemRule, value: string) {
+        if (!/^[a-zA-Z0-9_]{5,10}$/.test(value)) {
+          return new Error('密码需要5-10位数字字母_');
+        }
+        return true;
+      },
+      trigger: 'blur',
+    },
   };
 
   const userStore = useUserStore();
@@ -102,15 +114,15 @@
         message.loading('登录中...');
         loading.value = true;
 
-        const params: FormState = {
-          username,
-          password,
+        const params = {
+          operName: username.toString(),
+          passwd: password.toString(),
         };
 
         try {
-          const { code, message: msg } = await userStore.login(params);
+          const { statusCode, message: msg } = await userStore.login(params);
           message.destroyAll();
-          if (code == ResultEnum.SUCCESS) {
+          if (statusCode == ResultEnum.SUCCESS) {
             const toPath = decodeURIComponent((route.query?.redirect || '/') as string);
             message.success('登录成功，即将进入系统');
             if (route.name === LOGIN_NAME) {

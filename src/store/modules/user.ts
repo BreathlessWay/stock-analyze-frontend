@@ -3,18 +3,18 @@ import { store } from '@/store';
 import { ACCESS_TOKEN, CURRENT_USER, IS_SCREENLOCKED } from '@/store/mutation-types';
 import { ResultEnum } from '@/enums/httpEnum';
 
-import { getUserInfo as getUserInfoApi, login } from '@/api/system/user';
+import { getUserInfo as getUserInfoApi, login, register } from '@/api/system/user';
 import { storage } from '@/utils/Storage';
 
 export type UserInfoType = {
   // TODO: add your own data
-  username: string;
+  operName: string;
   email: string;
 };
 
 export interface IUserState {
   token: string;
-  username: string;
+  operName: string;
   welcome: string;
   avatar: string;
   permissions: any[];
@@ -25,7 +25,7 @@ export const useUserStore = defineStore({
   id: 'app-user',
   state: (): IUserState => ({
     token: storage.get(ACCESS_TOKEN, ''),
-    username: '',
+    operName: '',
     welcome: '',
     avatar: '',
     permissions: [],
@@ -39,7 +39,7 @@ export const useUserStore = defineStore({
       return this.avatar;
     },
     getNickname(): string {
-      return this.username;
+      return this.operName;
     },
     getPermissions(): [any][] {
       return this.permissions;
@@ -64,37 +64,46 @@ export const useUserStore = defineStore({
     // 登录
     async login(params: any) {
       const response = await login(params);
-      const { result, code } = response;
-      if (code === ResultEnum.SUCCESS) {
+      const { data, statusCode } = response;
+      if (statusCode === ResultEnum.SUCCESS) {
         const ex = 7 * 24 * 60 * 60;
-        storage.set(ACCESS_TOKEN, result.token, ex);
-        storage.set(CURRENT_USER, result, ex);
+        storage.set(ACCESS_TOKEN, data.token, ex);
+        storage.set(CURRENT_USER, data, ex);
         storage.set(IS_SCREENLOCKED, false);
-        this.setToken(result.token);
-        this.setUserInfo(result);
+        this.setToken(data.token);
+        this.setUserInfo(data);
+      }
+      return response;
+    },
+
+    // 注册
+    async register(params: any) {
+      const response = await register(params);
+      console.log(response);
+      const { data, statusCode } = response;
+      if (statusCode === ResultEnum.SUCCESS) {
+        const ex = 7 * 24 * 60 * 60;
+        storage.set(ACCESS_TOKEN, data.token, ex);
+        storage.set(CURRENT_USER, data, ex);
+        storage.set(IS_SCREENLOCKED, false);
+        this.setToken(data.token);
+        this.setUserInfo(data);
       }
       return response;
     },
 
     // 获取用户信息
     async getInfo() {
-      const data = await getUserInfoApi();
-      const { result } = data;
-      if (result.permissions && result.permissions.length) {
-        const permissionsList = result.permissions;
-        this.setPermissions(permissionsList);
-        this.setUserInfo(result);
-      } else {
-        throw new Error('getInfo: permissionsList must be a non-null array !');
-      }
-      this.setAvatar(result.avatar);
-      return result;
+      const response = await getUserInfoApi();
+      const { data } = response;
+      this.setUserInfo(data);
+      return data;
     },
 
     // 登出
     async logout() {
       this.setPermissions([]);
-      this.setUserInfo({ username: '', email: '' });
+      this.setUserInfo({ operName: '', email: '' });
       storage.remove(ACCESS_TOKEN);
       storage.remove(CURRENT_USER);
     },
