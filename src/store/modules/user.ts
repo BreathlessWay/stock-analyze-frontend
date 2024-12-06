@@ -98,6 +98,14 @@ export const useUserStore = defineStore({
     // 获取用户信息
     async getInfo() {
       const response = await getUserInfoApi();
+      if (response.statusCode !== ResultEnum.SUCCESS) {
+        // @ts-ignore
+        window.$message.error(response.message);
+        await this.logout();
+        setTimeout(() => {
+          location.reload();
+        }, 300);
+      }
       const { data } = response;
       this.setUserInfo(data);
       return data;

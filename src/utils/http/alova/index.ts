@@ -30,6 +30,7 @@ export const Alova = createAlova({
       if (method.meta?.isReturnNativeResponse) {
         return res;
       }
+
       // 请根据自身情况修改数据结构
       const { message, statusCode, data } = res;
 

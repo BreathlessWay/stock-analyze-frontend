@@ -31,25 +31,18 @@
   import type { EChartsType } from 'echarts/core';
 
   const props = defineProps<{
-    x: number[];
+    x: string[];
     y: number[];
     loading: boolean;
   }>();
 
   let echartsInstance: EChartsType | null = null;
 
-  let base = +new Date(1988, 9, 3);
-  let oneDay = 24 * 3600 * 1000;
-  let data = [[base, Math.random() * 300]];
-  for (let i = 1; i < 20000; i++) {
-    let now = new Date((base += oneDay));
-    data.push([+now, Math.round((Math.random() - 0.5) * 20 + data[i - 1][1])]);
-  }
   const option = {
     grid: {
       left: 50,
-      right: 0,
-      bottom: 80,
+      right: 50,
+      bottom: 30,
     },
     tooltip: {
       trigger: 'axis',
@@ -63,50 +56,52 @@
         saveAsImage: {},
       },
     },
-    // xAxis: {
-    //   type: 'category',
-    //   data: [],
-    // },
     xAxis: {
-      type: 'time',
+      type: 'category',
+      data: [] as string[],
       boundaryGap: false,
     },
     yAxis: {
       type: 'value',
-      boundaryGap: [0, '100%'],
+      boundaryGap: false,
     },
-    dataZoom: [
-      {
-        type: 'inside',
-        start: 0,
-        end: 20,
-      },
-      {
-        start: 0,
-        end: 20,
-      },
-    ],
+    // dataZoom: [
+    //   {
+    //     type: 'inside',
+    //     start: 0,
+    //     end: 20,
+    //   },
+    //   {
+    //     start: 0,
+    //     end: 20,
+    //   },
+    // ],
     series: [
       {
-        name: '当日收益',
+        name: '当日收益率',
         type: 'line',
         smooth: true,
         symbol: 'none',
         areaStyle: {},
-        data,
+        data: [] as number[],
       },
     ],
   };
 
   const setChartsOptions = () => {
+    const dom = document.getElementById('analyze-chart');
+
     if (!echartsInstance) {
-      const dom = document.getElementById('analyze-chart');
       echartsInstance = echarts.init(dom);
     }
     if (hasData.value) {
-      const dom = document.getElementById('analyze-chart');
       dom!.style.opacity = '1';
+      console.log(props.x);
+      option.xAxis.data = props.x;
+      option.series[0].data = props.y;
       echartsInstance.setOption(option);
+    } else {
+      dom!.style.opacity = '0';
     }
   };
 
@@ -125,7 +120,7 @@
 
 <style scoped lang="less">
   .analyze-chart {
-    margin-top: 10px;
+    margin-top: 20px;
     width: 100%;
     height: 500px;
     opacity: 0;

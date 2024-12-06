@@ -37,11 +37,15 @@
 <script lang="ts" setup>
   import { ref, reactive } from 'vue';
 
+  import { useMessage } from 'naive-ui';
   import FileComponent from './components/FileComponent.vue';
   import Charts from './components/Charts.vue';
 
-  import type { FormInst, FormItemRule } from 'naive-ui';
   import { analyzeStockService } from '@/api/earnings/analyze';
+
+  import type { FormInst, FormItemRule } from 'naive-ui';
+
+  const message = useMessage();
 
   const formRef = ref<FormInst | null>(null);
   const loading = ref(false);
@@ -78,7 +82,7 @@
     },
   };
   const searchResult = reactive({
-    x: [] as number[],
+    x: [] as string[],
     y: [] as number[],
   });
 
@@ -104,10 +108,12 @@
           start_date: model.value?.datetimeValue?.[0],
           end_date: model.value?.datetimeValue?.[1],
         });
-        console.log(res);
         loading.value = false;
-        searchResult.x = [111];
-        searchResult.y = [1111];
+        searchResult.x = res?.x;
+        searchResult.y = res?.y;
+        if (res?.msg) {
+          message.warning(res.msg);
+        }
       } else {
         console.log(errors);
       }
