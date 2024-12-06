@@ -5,7 +5,7 @@
       class="earnings-analyze_upload"
       v-model:file-list="uploadFile"
       action="/earnings/analyze_file"
-      accept=".xls,.xlsx"
+      accept=".xls,.xlsx,.csv"
       show-download-button
       @before-upload="beforeUpload"
       @remove="handleRemove"
@@ -31,7 +31,7 @@
 
   import type { UploadFileInfo, UploadCustomRequestOptions } from 'naive-ui';
 
-  const allowedExtensions = ['xls', 'xlsx'];
+  const allowedExtensions = ['xls', 'xlsx', 'csv'];
   const allowedSize = 1024 * 1024 * 5;
   const message = useMessage();
 
@@ -107,7 +107,7 @@
   const beforeUpload = (data: { file: UploadFileInfo; fileList: UploadFileInfo[] }) => {
     const fileExtension = data.file.file?.name.split('.').pop()?.toLowerCase() ?? '';
     if (!allowedExtensions.includes(fileExtension)) {
-      message.error('只能上传 excel 文件，请重新上传');
+      message.error('只能上传 excel 或 csv 文件，请重新上传');
       return false;
     }
     if ((data.file.file?.size ?? 0) / allowedSize > 1) {
