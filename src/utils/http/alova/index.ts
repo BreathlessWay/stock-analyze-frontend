@@ -7,7 +7,7 @@ import { useGlobSetting } from '@/hooks/setting';
 import { PageEnum } from '@/enums/pageEnum';
 import { ResultEnum } from '@/enums/httpEnum';
 
-const { apiUrl } = useGlobSetting();
+const { apiUrl, urlPrefix } = useGlobSetting();
 
 export const Alova = createAlova({
   baseURL: apiUrl,
@@ -21,6 +21,9 @@ export const Alova = createAlova({
     // 添加 token 到请求头
     if (!method.meta?.ignoreToken && token) {
       method.config.headers['token'] = token;
+    }
+    if (urlPrefix) {
+      method.url = `${urlPrefix}${method.url}`;
     }
   },
   responded: {
