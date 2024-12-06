@@ -46,12 +46,9 @@
               </div>
             </div>
           </n-form-item>
-          <n-space justify="center">
-            <n-button type="primary" @click="handleSubmit" size="large" :loading="loading">
-              登录
-            </n-button>
-            <n-button @click="handleRegister" size="large">注册</n-button>
-          </n-space>
+          <n-button type="primary" @click="handleSubmit" size="large" :loading="loading" block>
+            登录
+          </n-button>
         </n-form>
       </div>
     </div>
@@ -137,12 +134,6 @@
       } else {
         message.error('请填写完整信息，并且进行验证码校验');
       }
-    });
-  };
-
-  const handleRegister = () => {
-    router.push({
-      name: 'Register',
     });
   };
 </script>
