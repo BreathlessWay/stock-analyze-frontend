@@ -104,7 +104,7 @@
       if (!errors) {
         loading.value = true;
         const res = await analyzeStockService({
-          stock_code: model.value.inputValue,
+          stock_code: model.value.inputValue || '',
           start_date: model.value?.datetimeValue?.[0],
           end_date: model.value?.datetimeValue?.[1],
         });
