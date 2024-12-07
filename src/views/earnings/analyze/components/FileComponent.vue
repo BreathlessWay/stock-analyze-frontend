@@ -1,6 +1,6 @@
 <template>
   <n-space align="center">
-    <n-button text @click="handleDownloadTemplate"> 下载模板 </n-button>
+    <n-button text @click="handleDownloadTemplate">下载模板</n-button>
     <n-upload
       class="earnings-analyze_upload"
       v-model:file-list="uploadFile"
@@ -14,10 +14,13 @@
     >
       <n-button v-show="!uploadFile.length" quaternary type="primary">上传文件</n-button>
     </n-upload>
+    <n-button v-show="showResultBtn" text @click="handleDownloadResult" type="info">
+      下载分析结果
+    </n-button>
   </n-space>
 </template>
 <script setup lang="ts">
-  import { ref, watch } from 'vue';
+  import { ref, watch, computed } from 'vue';
 
   import { useMessage } from 'naive-ui';
 
@@ -27,7 +30,11 @@
 
   import { Alova } from '@/utils/http/alova';
 
-  import { deleteFileService, getTemplateFilePathService } from '@/api/earnings/analyze';
+  import {
+    deleteFileService,
+    getAnalyzeResultFilePathService,
+    getTemplateFilePathService,
+  } from '@/api/earnings/analyze';
 
   import type { UploadFileInfo, UploadCustomRequestOptions } from 'naive-ui';
 
@@ -43,10 +50,21 @@
         status: string;
       }[];
 
+  const props = defineProps<{
+    analyzeResult: {
+      x: string[];
+      y: number[];
+    };
+  }>();
+
   const userStore = useUserStore();
 
   const loading = ref(false);
   const uploadFile = ref<UploadFileType>([]);
+
+  const showResultBtn = computed(() => {
+    return props.analyzeResult && props.analyzeResult.x.length;
+  });
 
   watch(
     () => userStore.info,
@@ -79,6 +97,20 @@
       throw '';
     } catch (e) {
       message.error('获取模板文件失败');
+    }
+  };
+
+  const handleDownloadResult = async () => {
+    try {
+      const res = await getAnalyzeResultFilePathService();
+      if (res) {
+        const fileHref = `${import.meta.env.VITE_GLOB_API_URL}/${res.analyze_file}`;
+        useDownload(fileHref, '');
+        return;
+      }
+      throw '';
+    } catch (e) {
+      message.error('获取分析结果文件失败');
     }
   };
 

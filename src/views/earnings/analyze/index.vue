@@ -29,7 +29,7 @@
         <n-button @click="reset">重置</n-button>
       </n-space>
     </n-form>
-    <FileComponent />
+    <FileComponent :analyze-result="searchResult" />
     <Charts :loading="loading" :x="searchResult.x" :y="searchResult.y" />
   </article>
 </template>

@@ -82,7 +82,6 @@
         type: 'line',
         smooth: true,
         symbol: 'none',
-        areaStyle: {},
         data: [] as number[],
       },
     ],
