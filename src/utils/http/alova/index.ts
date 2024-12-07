@@ -67,7 +67,7 @@ export const Alova = createAlova({
         });
       } else {
         Message?.error(message);
-        throw new Error(message);
+        // throw new Error(message);
       }
     },
   },

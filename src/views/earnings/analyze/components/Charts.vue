@@ -11,85 +11,135 @@
     ToolboxComponent,
     TooltipComponent,
     GridComponent,
-    DataZoomComponent,
+    LegendComponent,
   } from 'echarts/components';
   import { LineChart } from 'echarts/charts';
   import { UniversalTransition } from 'echarts/features';
   import { CanvasRenderer } from 'echarts/renderers';
+
+  import BigNumber from 'bignumber.js';
 
   echarts.use([
     TitleComponent,
     ToolboxComponent,
     TooltipComponent,
     GridComponent,
-    DataZoomComponent,
     LineChart,
     CanvasRenderer,
     UniversalTransition,
+    LegendComponent,
   ]);
 
   import type { EChartsType } from 'echarts/core';
+  import type { OriginalListItemType } from '@/api/earnings/analyze';
 
   const props = defineProps<{
     x: string[];
     y: number[];
+    list: OriginalListItemType[];
     loading: boolean;
   }>();
 
   let echartsInstance: EChartsType | null = null;
 
-  const option = {
-    grid: {
-      left: 50,
-      right: 50,
-      bottom: 30,
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    title: {
-      left: 'center',
-      text: '收益分析',
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {},
+  const option = computed(() => {
+    const firstDayPriceMap = new Map<string, string>();
+    const baseProfitStockMap = new Map<string, OriginalListItemType & { baseProfit: number }>();
+    props.list.forEach((item) => {
+      const { stockCode, tradeDate, price } = item;
+
+      const key = `${tradeDate}-${stockCode}`;
+      if (!firstDayPriceMap.has(stockCode)) {
+        firstDayPriceMap.set(stockCode, price);
+        baseProfitStockMap.set(key, {
+          ...item,
+          baseProfit: 0,
+        });
+        return;
+      }
+      const firstDayPrice = firstDayPriceMap.get(stockCode);
+      baseProfitStockMap.set(key, {
+        ...item,
+        baseProfit: new BigNumber(price).div(new BigNumber(firstDayPrice!)).minus(1).toNumber(),
+      });
+    });
+
+    const baseProfitSumMap = new Map<string, number>();
+
+    baseProfitStockMap.forEach((item) => {
+      const { tradeDate, baseProfit } = item;
+      if (baseProfitSumMap.has(tradeDate)) {
+        const latestBaseProfit = baseProfitSumMap.get(tradeDate);
+        baseProfitSumMap.set(
+          tradeDate,
+          new BigNumber(latestBaseProfit!).plus(new BigNumber(baseProfit)).toNumber()
+        );
+      } else {
+        baseProfitSumMap.set(tradeDate, baseProfit);
+      }
+    });
+
+    return {
+      legend: {
+        data: ['累计收益率', '当日基础收益率'],
+        top: 40,
       },
-    },
-    xAxis: {
-      type: 'category',
-      data: [] as string[],
-      boundaryGap: false,
-    },
-    yAxis: {
-      type: 'value',
-      axisLabel: {
-        formatter: function (value: number) {
-          return value * 100 + '%';
+      grid: {
+        left: 50,
+        right: 50,
+        bottom: 30,
+        top: 80,
+      },
+      tooltip: {
+        trigger: 'axis',
+      },
+      title: {
+        left: 'center',
+        text: '收益分析',
+      },
+      toolbox: {
+        feature: {
+          saveAsImage: {},
         },
       },
-    },
-    // dataZoom: [
-    //   {
-    //     type: 'inside',
-    //     start: 0,
-    //     end: 20,
-    //   },
-    //   {
-    //     start: 0,
-    //     end: 20,
-    //   },
-    // ],
-    series: [
-      {
-        name: '当日收益率',
-        type: 'line',
-        smooth: true,
-        symbol: 'none',
-        data: [] as number[],
+      xAxis: {
+        type: 'category',
+        data: props.x || [],
+        boundaryGap: false,
       },
-    ],
-  };
+      yAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: function (value: number) {
+            return value * 100 + '%';
+          },
+        },
+      },
+      series: [
+        {
+          name: '累计收益率',
+          type: 'line',
+          smooth: true,
+          symbol: 'none',
+          data: props.y || [],
+        },
+        {
+          name: '当日基础收益率',
+          type: 'line',
+          smooth: true,
+          symbol: 'none',
+          data: [...baseProfitSumMap.values()],
+        },
+        // {
+        //   name: '累计最终收益率',
+        //   type: 'line',
+        //   smooth: true,
+        //   symbol: 'none',
+        //   data: [...baseProfitSumMap.values()],
+        // },
+      ],
+    };
+  });
 
   const setChartsOptions = () => {
     const dom = document.getElementById('analyze-chart');
@@ -99,10 +149,7 @@
     }
     if (hasData.value) {
       dom!.style.opacity = '1';
-      console.log(props.x);
-      option.xAxis.data = props.x;
-      option.series[0].data = props.y;
-      echartsInstance.setOption(option);
+      echartsInstance.setOption(option.value);
     } else {
       dom!.style.opacity = '0';
     }

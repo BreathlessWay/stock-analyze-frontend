@@ -30,7 +30,12 @@
       </n-space>
     </n-form>
     <FileComponent :analyze-result="searchResult" />
-    <Charts :loading="loading" :x="searchResult.x" :y="searchResult.y" />
+    <Charts
+      :loading="loading"
+      :x="searchResult.x"
+      :y="searchResult.y"
+      :list="searchResult.originalList"
+    />
   </article>
 </template>
 
@@ -44,6 +49,7 @@
   import { analyzeStockService } from '@/api/earnings/analyze';
 
   import type { FormInst, FormItemRule } from 'naive-ui';
+  import type { OriginalListItemType } from '@/api/earnings/analyze';
 
   const message = useMessage();
 
@@ -84,6 +90,7 @@
   const searchResult = reactive({
     x: [] as string[],
     y: [] as number[],
+    originalList: [] as OriginalListItemType[],
   });
 
   const disablePreviousDate = (ts: number) => {
@@ -109,8 +116,10 @@
           end_date: model.value?.datetimeValue?.[1],
         });
         loading.value = false;
-        searchResult.x = res?.x;
-        searchResult.y = res?.y;
+        searchResult.x = res?.x || [];
+        searchResult.y = res?.y || [];
+        searchResult.y = res?.y || [];
+        searchResult.originalList = res?.originalList || [];
         if (res?.msg) {
           message.warning(res.msg);
         }
