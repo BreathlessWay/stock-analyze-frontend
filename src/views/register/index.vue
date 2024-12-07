@@ -97,12 +97,8 @@
     username: {
       required: true,
       validator(_: FormItemRule, value: string) {
-        let v = value ? value.trim() : value;
-        if (!v) {
-          return new Error('请输入用户名');
-        }
-        if (v.length < 5) {
-          return new Error('用户名最少5位');
+        if (!/^[a-zA-Z0-9]{3,}$/.test(value)) {
+          return new Error('用户名需要至少3位数字字母');
         }
         return true;
       },
@@ -111,12 +107,8 @@
     password1: {
       required: true,
       validator(_: FormItemRule, value: string) {
-        let v = value ? value.trim() : value;
-        if (!v) {
-          return new Error('请输入密码');
-        }
-        if (v.length < 5) {
-          return new Error('密码最少5位');
+        if (!/^[a-zA-Z0-9_]{6,}$/.test(value)) {
+          return new Error('密码需要至少6位数字字母_');
         }
         return true;
       },
@@ -125,8 +117,8 @@
     password2: {
       required: true,
       validator(_: FormItemRule, value: string) {
-        if (!value) {
-          return new Error('请输入确认密码');
+        if (!/^[a-zA-Z0-9_]{6,}$/.test(value)) {
+          return new Error('密码需要至少6位数字字母_');
         }
         if (value !== formInline.password1) {
           return new Error('两次输入密码不一致');

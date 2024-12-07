@@ -63,7 +63,11 @@
     },
     yAxis: {
       type: 'value',
-      boundaryGap: false,
+      axisLabel: {
+        formatter: function (value: number) {
+          return value * 100 + '%';
+        },
+      },
     },
     // dataZoom: [
     //   {

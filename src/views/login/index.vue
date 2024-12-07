@@ -80,8 +80,8 @@
   const rules = {
     username: {
       validator(_: FormItemRule, value: string) {
-        if (!/^[a-zA-Z0-9_]{5,10}$/.test(value)) {
-          return new Error('用户名需要5-10位数字字母_');
+        if (!/^[a-zA-Z0-9]{3,}$/.test(value)) {
+          return new Error('用户名需要至少3位数字字母');
         }
         return true;
       },
@@ -89,8 +89,8 @@
     },
     password: {
       validator(_: FormItemRule, value: string) {
-        if (!/^[a-zA-Z0-9_]{5,10}$/.test(value)) {
-          return new Error('密码需要5-10位数字字母_');
+        if (!/^[a-zA-Z0-9_]{6,}$/.test(value)) {
+          return new Error('密码需要至少6位数字字母_');
         }
         return true;
       },
