@@ -41,7 +41,7 @@
   const option = computed(() => {
     return {
       legend: {
-        data: ['累计收益率', '累计基础收益率', '累计最终收益率'],
+        data: ['增强收益率', '股票收益率', '最终收益率'],
         top: 40,
       },
       grid: {
@@ -77,21 +77,21 @@
       },
       series: [
         {
-          name: '累计收益率',
+          name: '增强收益率',
           type: 'line',
           smooth: true,
           symbol: 'none',
           data: props?.analyzeResult?.profitRatioSumList ?? [],
         },
         {
-          name: '累计基础收益率',
+          name: '股票收益率',
           type: 'line',
           smooth: true,
           symbol: 'none',
           data: props?.analyzeResult?.baseProfitRatioSumList ?? [],
         },
         {
-          name: '累计最终收益率',
+          name: '最终收益率',
           type: 'line',
           smooth: true,
           symbol: 'none',
