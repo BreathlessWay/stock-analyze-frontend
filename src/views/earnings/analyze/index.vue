@@ -125,6 +125,7 @@
     border-radius: 2px;
     width: 100%;
     height: calc(100vh - 64px - 12px - 10px);
+    overflow: auto;
   }
 
   .analyze :deep(.n-form-item-label__asterisk-placeholder) {
