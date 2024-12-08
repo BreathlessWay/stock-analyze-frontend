@@ -88,8 +88,7 @@
     try {
       const res = await getTemplateFilePathService();
       if (res) {
-        const fileHref = `${import.meta.env.VITE_GLOB_API_URL}/${res.template_file}`;
-        useDownload(fileHref, '');
+        useDownload(res.template_file);
         return;
       }
       throw '';
@@ -102,8 +101,7 @@
     try {
       const res = await getAnalyzeResultFilePathService();
       if (res) {
-        const fileHref = `${import.meta.env.VITE_GLOB_API_URL}/${res.analyze_file}`;
-        useDownload(fileHref, '');
+        useDownload(res.analyze_file);
         return;
       }
       throw '';

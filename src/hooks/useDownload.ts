@@ -1,4 +1,5 @@
-export const useDownload = (fileUrl: string, fileName: string) => {
+export const useDownload = (fileUrl: string, fileName = '') => {
+  fileUrl = `${import.meta.env.VITE_GLOB_API_URL}/${fileUrl}`;
   // 创建一个临时的 a 标签用于下载
   const link = document.createElement('a');
   link.target = '_blank';
