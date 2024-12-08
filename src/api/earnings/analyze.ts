@@ -16,13 +16,26 @@ export type OriginalListItemType = {
   price: string;
   profitRatio: string;
   stockCode: string;
-  stockCount: string;
+  stockCount: number;
   tradeDate: string;
+  marketValue: string;
+  baseProfitRatio: string;
+  yieldRate: string;
+  yieldRateProfitRatio: string;
+  yieldRateBaseProfitRatio: string;
+};
+
+export type AnalyzeStockServiceResultType = {
+  tradeDateList: string[];
+  profitRatioSumList: number[];
+  baseProfitRatioSumList: number[];
+  finalProfitRatioSumList: number[];
+  originalList: OriginalListItemType[];
 };
 
 export const analyzeStockService = (
   params: any
-): Promise<{ msg: string; x: string[]; y: number[]; originalList: OriginalListItemType[] }> => {
+): Promise<{ msg: string } & AnalyzeStockServiceResultType> => {
   return Alova.Get('/earnings/analyze_stock', {
     params,
   });

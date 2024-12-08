@@ -17,8 +17,6 @@
   import { UniversalTransition } from 'echarts/features';
   import { CanvasRenderer } from 'echarts/renderers';
 
-  import BigNumber from 'bignumber.js';
-
   echarts.use([
     TitleComponent,
     ToolboxComponent,
@@ -31,57 +29,19 @@
   ]);
 
   import type { EChartsType } from 'echarts/core';
-  import type { OriginalListItemType } from '@/api/earnings/analyze';
+  import type { AnalyzeStockServiceResultType } from '@/api/earnings/analyze';
 
   const props = defineProps<{
-    x: string[];
-    y: number[];
-    list: OriginalListItemType[];
+    analyzeResult: AnalyzeStockServiceResultType | null;
     loading: boolean;
   }>();
 
   let echartsInstance: EChartsType | null = null;
 
   const option = computed(() => {
-    const firstDayPriceMap = new Map<string, string>();
-    const baseProfitStockMap = new Map<string, OriginalListItemType & { baseProfit: number }>();
-    props.list.forEach((item) => {
-      const { stockCode, tradeDate, price } = item;
-
-      const key = `${tradeDate}-${stockCode}`;
-      if (!firstDayPriceMap.has(stockCode)) {
-        firstDayPriceMap.set(stockCode, price);
-        baseProfitStockMap.set(key, {
-          ...item,
-          baseProfit: 0,
-        });
-        return;
-      }
-      const firstDayPrice = firstDayPriceMap.get(stockCode);
-      baseProfitStockMap.set(key, {
-        ...item,
-        baseProfit: new BigNumber(price).div(new BigNumber(firstDayPrice!)).minus(1).toNumber(),
-      });
-    });
-
-    const baseProfitSumMap = new Map<string, number>();
-
-    baseProfitStockMap.forEach((item) => {
-      const { tradeDate, baseProfit } = item;
-      if (baseProfitSumMap.has(tradeDate)) {
-        const latestBaseProfit = baseProfitSumMap.get(tradeDate);
-        baseProfitSumMap.set(
-          tradeDate,
-          new BigNumber(latestBaseProfit!).plus(new BigNumber(baseProfit)).toNumber()
-        );
-      } else {
-        baseProfitSumMap.set(tradeDate, baseProfit);
-      }
-    });
-
     return {
       legend: {
-        data: ['累计收益率', '当日基础收益率'],
+        data: ['累计收益率', '累计基础收益率', '累计最终收益率'],
         top: 40,
       },
       grid: {
@@ -104,7 +64,7 @@
       },
       xAxis: {
         type: 'category',
-        data: props.x || [],
+        data: props?.analyzeResult?.tradeDateList ?? [],
         boundaryGap: false,
       },
       yAxis: {
@@ -121,22 +81,22 @@
           type: 'line',
           smooth: true,
           symbol: 'none',
-          data: props.y || [],
+          data: props?.analyzeResult?.profitRatioSumList ?? [],
         },
         {
-          name: '当日基础收益率',
+          name: '累计基础收益率',
           type: 'line',
           smooth: true,
           symbol: 'none',
-          data: [...baseProfitSumMap.values()],
+          data: props?.analyzeResult?.baseProfitRatioSumList ?? [],
         },
-        // {
-        //   name: '累计最终收益率',
-        //   type: 'line',
-        //   smooth: true,
-        //   symbol: 'none',
-        //   data: [...baseProfitSumMap.values()],
-        // },
+        {
+          name: '累计最终收益率',
+          type: 'line',
+          smooth: true,
+          symbol: 'none',
+          data: props?.analyzeResult?.finalProfitRatioSumList ?? [],
+        },
       ],
     };
   });
@@ -160,7 +120,11 @@
   });
 
   const hasData = computed(() => {
-    return props.x?.length && props.y?.length && !props.loading;
+    return (
+      props.analyzeResult &&
+      props.analyzeResult.tradeDateList &&
+      props.analyzeResult.tradeDateList.length > 0
+    );
   });
 
   watch(hasData, () => {

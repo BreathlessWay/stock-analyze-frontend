@@ -37,6 +37,7 @@
   } from '@/api/earnings/analyze';
 
   import type { UploadFileInfo, UploadCustomRequestOptions } from 'naive-ui';
+  import type { AnalyzeStockServiceResultType } from '@/api/earnings/analyze';
 
   const allowedExtensions = ['xls', 'xlsx', 'csv'];
   const allowedSize = 1024 * 1024 * 5;
@@ -51,10 +52,7 @@
       }[];
 
   const props = defineProps<{
-    analyzeResult: {
-      x: string[];
-      y: number[];
-    };
+    analyzeResult: AnalyzeStockServiceResultType | null;
   }>();
 
   const userStore = useUserStore();
@@ -63,7 +61,7 @@
   const uploadFile = ref<UploadFileType>([]);
 
   const showResultBtn = computed(() => {
-    return props.analyzeResult && props.analyzeResult.x.length;
+    return props.analyzeResult && props.analyzeResult.tradeDateList.length;
   });
 
   watch(

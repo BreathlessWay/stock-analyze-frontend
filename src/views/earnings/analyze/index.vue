@@ -30,17 +30,12 @@
       </n-space>
     </n-form>
     <FileComponent :analyze-result="searchResult" />
-    <Charts
-      :loading="loading"
-      :x="searchResult.x"
-      :y="searchResult.y"
-      :list="searchResult.originalList"
-    />
+    <Charts :loading="loading" :analyze-result="searchResult" />
   </article>
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive } from 'vue';
+  import { ref } from 'vue';
 
   import { useMessage } from 'naive-ui';
   import FileComponent from './components/FileComponent.vue';
@@ -49,7 +44,7 @@
   import { analyzeStockService } from '@/api/earnings/analyze';
 
   import type { FormInst, FormItemRule } from 'naive-ui';
-  import type { OriginalListItemType } from '@/api/earnings/analyze';
+  import type { AnalyzeStockServiceResultType } from '@/api/earnings/analyze';
 
   const message = useMessage();
 
@@ -87,11 +82,7 @@
       },
     },
   };
-  const searchResult = reactive({
-    x: [] as string[],
-    y: [] as number[],
-    originalList: [] as OriginalListItemType[],
-  });
+  const searchResult = ref<AnalyzeStockServiceResultType | null>(null);
 
   const disablePreviousDate = (ts: number) => {
     return ts > Date.now();
@@ -116,10 +107,7 @@
           end_date: model.value?.datetimeValue?.[1],
         });
         loading.value = false;
-        searchResult.x = res?.x || [];
-        searchResult.y = res?.y || [];
-        searchResult.y = res?.y || [];
-        searchResult.originalList = res?.originalList || [];
+        searchResult.value = res;
         if (res?.msg) {
           message.warning(res.msg);
         }
