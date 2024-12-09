@@ -127,9 +127,15 @@
     );
   });
 
-  watch(hasData, () => {
-    setChartsOptions();
-  });
+  watch(
+    () => props.analyzeResult,
+    () => {
+      setChartsOptions();
+    },
+    {
+      deep: true,
+    }
+  );
 </script>
 
 <style scoped lang="less">

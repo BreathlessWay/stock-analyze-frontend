@@ -49,7 +49,7 @@
       }
       throw '';
     } catch (e) {
-      message.error('获取报告文件失败');
+      console.log(e);
     } finally {
       loading.value = false;
     }
