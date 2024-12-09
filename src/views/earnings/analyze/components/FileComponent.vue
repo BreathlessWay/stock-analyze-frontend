@@ -93,7 +93,7 @@
       }
       throw '';
     } catch (e) {
-      message.error('获取模板文件失败');
+      e && message.error('获取模板文件失败');
     }
   };
 
@@ -106,7 +106,7 @@
       }
       throw '';
     } catch (e) {
-      message.error('获取分析结果文件失败');
+      e && message.error('获取分析结果文件失败');
     }
   };
 
@@ -124,7 +124,7 @@
       }
       throw '';
     } catch (e) {
-      message.error('删除文件失败');
+      e && message.error('删除文件失败');
     }
   };
 

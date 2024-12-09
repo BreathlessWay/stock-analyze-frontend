@@ -25,7 +25,14 @@
         />
       </n-form-item>
       <n-space>
-        <n-button type="primary" @click="handleValidateButtonClick">查询</n-button>
+        <n-button
+          type="primary"
+          @click="handleValidateButtonClick"
+          :loading="loading"
+          :disabled="loading"
+        >
+          查询
+        </n-button>
         <n-button @click="reset">重置</n-button>
       </n-space>
     </n-form>
@@ -101,15 +108,20 @@
     formRef.value?.validate(async (errors) => {
       if (!errors) {
         loading.value = true;
-        const res = await analyzeStockService({
-          stock_code: model.value.inputValue || '',
-          start_date: model.value?.datetimeValue?.[0],
-          end_date: model.value?.datetimeValue?.[1],
-        });
-        loading.value = false;
-        searchResult.value = res;
-        if (res?.msg) {
-          message.warning(res.msg);
+        try {
+          const res = await analyzeStockService({
+            stock_code: model.value.inputValue || '',
+            start_date: model.value?.datetimeValue?.[0],
+            end_date: model.value?.datetimeValue?.[1],
+          });
+          searchResult.value = res;
+          if (res?.msg) {
+            message.warning(res.msg);
+          }
+        } catch (e) {
+          console.log(e);
+        } finally {
+          loading.value = false;
         }
       } else {
         console.log(errors);
