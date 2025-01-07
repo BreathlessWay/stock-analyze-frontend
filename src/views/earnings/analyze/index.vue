@@ -24,6 +24,16 @@
           :is-date-disabled="disablePreviousDate"
         />
       </n-form-item>
+      <n-form-item label="手续费" path="serviceCharge">
+        <n-input-number
+          v-model:value="model.serviceCharge"
+          clearable
+          min="0"
+          placeholder="请输入手续费率"
+        >
+          <template #suffix>‱</template>
+        </n-input-number>
+      </n-form-item>
       <n-space>
         <n-button
           type="primary"
@@ -60,6 +70,7 @@
   const model = ref({
     inputValue: null,
     datetimeValue: null,
+    serviceCharge: 4,
   });
   const rules = {
     inputValue: {
@@ -88,6 +99,14 @@
         return new Error('请选择查询时间段');
       },
     },
+    serviceCharge: {
+      validator(_: FormItemRule, value: string) {
+        if (!/^(0|([1-9][0-9]*))(\.\d+)?$/.test(value)) {
+          return new Error('请收入手续费率');
+        }
+        return true;
+      },
+    },
   };
   const searchResult = ref<AnalyzeStockServiceResultType | null>(null);
 
@@ -99,6 +118,7 @@
     model.value = {
       inputValue: null,
       datetimeValue: null,
+      serviceCharge: 4,
     };
     formRef.value?.restoreValidation();
   };
@@ -113,8 +133,9 @@
             stock_code: model.value.inputValue || '',
             start_date: model.value?.datetimeValue?.[0],
             end_date: model.value?.datetimeValue?.[1],
+            service_charge: model.value?.serviceCharge || 4,
           });
-          searchResult.value = res;
+          searchResult.value = res || null;
           if (res?.msg) {
             message.warning(res.msg);
           }
