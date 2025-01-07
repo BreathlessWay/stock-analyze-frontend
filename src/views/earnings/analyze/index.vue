@@ -133,7 +133,7 @@
             stock_code: model.value.inputValue || '',
             start_date: model.value?.datetimeValue?.[0],
             end_date: model.value?.datetimeValue?.[1],
-            service_charge: model.value?.serviceCharge || 4,
+            service_charge: model.value?.serviceCharge,
           });
           searchResult.value = res || null;
           if (res?.msg) {
