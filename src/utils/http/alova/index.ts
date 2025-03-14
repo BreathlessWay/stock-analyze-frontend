@@ -12,7 +12,7 @@ const { apiUrl, urlPrefix } = useGlobSetting();
 export const Alova = createAlova({
   baseURL: apiUrl,
   statesHook: VueHook,
-  timeout: 1000000,
+  timeout: 600000,
   // cacheLogger: process.env.NODE_ENV === 'development',
   cacheFor: 0 as any,
   requestAdapter: adapterFetch(),
